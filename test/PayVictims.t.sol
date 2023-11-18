@@ -21,12 +21,14 @@ contract PayVictimsTest is DSTest {
         // Set up the test environment
         treasury = address(this); // for simplicity, the test contract itself will be the treasury
         mockUSDC = new MockERC20("Mock USDC", "mUSDC");
-        payVictims = new PayVictims(treasury, address(mockUSDC));
+        uint initialBalance = 100_000; // Initial balance of mockUSDC in the treasury
+        mockUSDC.mint(treasury, initialBalance);
+        payVictims = new PayVictims(treasury, address(mockUSDC), initialBalance);
     }
 
     function testInitialTreasuryBalance() public {
         // Test initial treasury balance
-        assertEq(payVictims.balances(treasury), 0);
+        assertEq(payVictims.balances(treasury), 100_000);
     }
 
     function testRegisterNewTreasury() public {

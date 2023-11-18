@@ -15,10 +15,10 @@ contract PayVictims {
 
     event PayVictimsEvent(string disasterType, uint256 amount, address[] victims, uint locId);
 
-    constructor(address _treasury, address _USDCtoken) {
+    constructor(address _treasury, address _USDCtoken, uint initialBalance) {
         treasury = _treasury;
         USDCtoken = IERC20(_USDCtoken);
-        balances[treasury] = 0;
+        balances[treasury] = initialBalance;
     }
 
 
