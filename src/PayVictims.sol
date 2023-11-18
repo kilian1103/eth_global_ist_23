@@ -5,13 +5,14 @@ pragma solidity ^0.8.13;
 
 contract PayVictims {
 
+    address public treasury;
+
 
     mapping(address => uint256) public balances;
-    address public treasury;
-    event NaturalDisaster(string disasterType, uint256 victims, uint256 amount);
-    event Payment(address victim, uint256 amount);
-    mapping(address => bool) public isVictim; // victim claim eligibility
     mapping(address => uint) public victimToLocationId; // victim to location id mapping
+    mapping(uint => address[]) public locationIdToVictims; // location id to victims mapping
+
+    event PayVictimsEvent(string disasterType, uint256 amount, address[] victims, uint locId);
 
     constructor(address _treasury) {
         treasury = _treasury;
@@ -24,8 +25,10 @@ contract PayVictims {
         //change treasury address
         //register treasury
         require(msg.sender == treasury, "only current treasury can register new treasury");
-        treasury = newTreasury;
+        uint treasuryBalance = balances[treasury];
         balances[treasury] = 0;
+        treasury = newTreasury;
+        balances[treasury] = treasuryBalance;
     }
 
     function fillTreasury(){
@@ -38,38 +41,36 @@ contract PayVictims {
 
 
 
-    function registerVictims(address[] memory victims, uint locId) public {
+    function registerPotentialVictims(address[] memory victims, uint locId) public {
         //register potential victims to treasury
         require(msg.sender == treasury, "only treasury can register victims");
         for (uint256 i = 0; i < victims.length; i++) {
             if (balances[victims[i]] != 0) {
-                isVictim[victims[i]] = true;
+                // if victim exists, user moved to new place
+                oldLocId = victimToLocationId[victims[i]];
+                locationIdToVictims[oldLocId].remove(victims[i]);
+                // update victim new loccation
                 victimToLocationId[victims[i]] = locId;
+                locationIdToVictims[locId].push(victims[i]);
                 continue;
             }
             balances[victims[i]] = 0;
-            isVictim[victims[i]] = true;
             victimToLocationId[victims[i]] = locId;
+            locationIdToVictims[locId].push(victims[i]);
         }
     }
 
 
-    function validateVictim(address victim, uint locId) internal returns (bool){
-        //validate victim claim
-        require(msg.sender == treasury, "only treasury can validate victims");
-        if (isVictim[victim] && victimToLocationId[victim] == locId) {
-            return true;
-        }
-        return false;
-    }
 
 
-
-    function payVictims(string memory disasterType, uint256 amount, address[] victims, uint locId) public {
+    function payVictims(uint locId) public {
         //pay victims of natural disaster when validation is complete
         require(msg.sender == treasury, "only treasury can pay victims");
-        require(_validateNaturalDisaster(disasterType, victims, amount), "natural disaster is not valid");
-        // pay logic
+        address[] memory victims = locationIdToVictims[locId];
+        uint256 amount = balances[treasury] / victims.length;
+        for (uint256 i = 0; i < victims.length; i++) {
+            balances[victims[i]] += amount;
+        }
 
     }
 
