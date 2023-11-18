@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
-
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/utils/Only";
 // contract that pays ERC20 token victims of natural disasters if natural disaster event is incoming
 
 contract PayVictims {
 
     address public treasury;
-
+    IERC20 public USDCtoken;
 
     mapping(address => uint256) public balances;
     mapping(address => uint) public victimToLocationId; // victim to location id mapping
@@ -14,10 +15,10 @@ contract PayVictims {
 
     event PayVictimsEvent(string disasterType, uint256 amount, address[] victims, uint locId);
 
-    constructor(address _treasury) {
+    constructor(address _treasury, address _USDCtoken) {
         treasury = _treasury;
+        token = IERC20(_tokenAddress);
         balances[treasury] = 0;
-
     }
 
 
@@ -27,15 +28,14 @@ contract PayVictims {
         require(msg.sender == treasury, "only current treasury can register new treasury");
         uint treasuryBalance = balances[treasury];
         balances[treasury] = 0;
-        treasury = newTreasury;
-        balances[treasury] = treasuryBalance;
+        balances[newtreasury] = treasuryBalance;
+        token.transferFrom(msg.sender, address(this), treasuryBalance);
+
     }
 
-    function fillTreasury(uint amount){
-        //fill treasury with ERC20 tokens
-        //only treasury can fill treasury
-        require(msg.sender == treasury, "only treasury can fill treasury");
+    function fillTreasury(uint amount) public {
         balances[treasury] += amount;
+        token.transferFrom(msg.sender, address(this), amount);
     }
 
 
@@ -63,13 +63,15 @@ contract PayVictims {
 
 
 
-    function payVictims(uint locId) public {
+    function payVictims(uint locId, uint totalAmount) public {
         //pay victims of natural disaster when validation is complete
         require(msg.sender == treasury, "only treasury can pay victims");
+        require(balances[treasury] >= totalAmount, "treasury balance is not enough");
         address[] memory victims = locationIdToVictims[locId];
-        uint256 amount = balances[treasury] / victims.length;
+        uint256 amount = totalAmount / victims.length;
         for (uint256 i = 0; i < victims.length; i++) {
             balances[victims[i]] += amount;
+            token.transferFrom(address(this), victims[i], amount);
         }
 
     }
