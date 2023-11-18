@@ -89,6 +89,4 @@ contract PayVictims {
         }
 
     }
-
-
 }
