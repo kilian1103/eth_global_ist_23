@@ -17,7 +17,7 @@ contract PayVictims {
 
     constructor(address _treasury, address _USDCtoken) {
         treasury = _treasury;
-        token = IERC20(_tokenAddress);
+        USDCtoken = IERC20(_USDCtoken);
         balances[treasury] = 0;
     }
 
@@ -29,13 +29,13 @@ contract PayVictims {
         uint treasuryBalance = balances[treasury];
         balances[treasury] = 0;
         balances[newtreasury] = treasuryBalance;
-        token.transferFrom(msg.sender, address(this), treasuryBalance);
+        USDCtoken.transferFrom(msg.sender, address(this), treasuryBalance);
 
     }
 
     function fillTreasury(uint amount) public {
         balances[treasury] += amount;
-        token.transferFrom(msg.sender, address(this), amount);
+        USDCtoken.transferFrom(msg.sender, address(this), amount);
     }
 
 
@@ -71,7 +71,7 @@ contract PayVictims {
         uint256 amount = totalAmount / victims.length;
         for (uint256 i = 0; i < victims.length; i++) {
             balances[victims[i]] += amount;
-            token.transferFrom(address(this), victims[i], amount);
+            USDCtoken.transferFrom(address(this), victims[i], amount);
         }
 
     }
