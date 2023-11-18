@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/utils/Only";
 // contract that pays ERC20 token victims of natural disasters if natural disaster event is incoming
 
 contract PayVictims {
@@ -28,7 +27,7 @@ contract PayVictims {
         require(msg.sender == treasury, "only current treasury can register new treasury");
         uint treasuryBalance = balances[treasury];
         balances[treasury] = 0;
-        balances[newtreasury] = treasuryBalance;
+        balances[newTreasury] = treasuryBalance;
         USDCtoken.transferFrom(msg.sender, address(this), treasuryBalance);
 
     }
@@ -47,7 +46,7 @@ contract PayVictims {
         for (uint256 i = 0; i < victims.length; i++) {
             if (balances[victims[i]] != 0) {
                 // if victim exists, user moved to new place
-                oldLocId = victimToLocationId[victims[i]];
+                uint oldLocId = victimToLocationId[victims[i]];
                 locationIdToVictims[oldLocId].remove(victims[i]);
                 // update victim new loccation
                 victimToLocationId[victims[i]] = locId;
