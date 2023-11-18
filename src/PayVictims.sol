@@ -31,11 +31,11 @@ contract PayVictims {
         balances[treasury] = treasuryBalance;
     }
 
-    function fillTreasury(){
+    function fillTreasury(uint amount){
         //fill treasury with ERC20 tokens
         //only treasury can fill treasury
         require(msg.sender == treasury, "only treasury can fill treasury");
-        balances[treasury] += msg.value;
+        balances[treasury] += amount;
     }
 
 
