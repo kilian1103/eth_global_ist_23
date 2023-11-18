@@ -29,6 +29,7 @@ contract PayVictims {
         uint treasuryBalance = balances[treasury];
         balances[treasury] = 0;
         balances[newTreasury] = treasuryBalance;
+        treasury = newTreasury;
         USDCtoken.transferFrom(msg.sender, address(this), treasuryBalance);
 
     }
