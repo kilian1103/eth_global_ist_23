@@ -1,4 +1,4 @@
-pragma solidity 0.8.10;
+pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
 import {PayVictims} from "../src/PayVictims.sol";
@@ -14,11 +14,11 @@ contract ContractTest is Test {
         victim = 0x0932f3f97f22D514E392B648Ce7c559F27BadB83;
         locID = 1;
         payvictims = new PayVictims();
-        payvictims.registerVictims(victim, locID);
+        payvictims.registerPotentialVictims(victim, locID);
     }
 
-    function (test_validateVictim) public {
-        payvictims.validateVictim(victim, locID);
+    function (test_payVictims) public {
+        payvictims.payVictims(victim, locID);
         //assertEq();
     }
 }
