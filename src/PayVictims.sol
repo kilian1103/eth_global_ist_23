@@ -12,7 +12,6 @@ contract PayVictims {
     event Payment(address victim, uint256 amount);
     mapping(address => bool) public isVictim; // victim claim eligibility
     mapping(address => uint) public victimToLocationId; // victim to location id mapping
-    mapping(uint => string) public locationIdToArea; // location id to area mapping
 
     constructor(address _treasury) {
         treasury = _treasury;
@@ -55,10 +54,13 @@ contract PayVictims {
     }
 
 
-    function validateVictim(address victim) internal returns (bool){
+    function validateVictim(address victim, uint locId) internal returns (bool){
         //validate victim claim
         require(msg.sender == treasury, "only treasury can validate victims");
-        return isVictim[victim];
+        if (isVictim[victim] && victimToLocationId[victim] == locId) {
+            return true;
+        }
+        return false;
     }
 
 
